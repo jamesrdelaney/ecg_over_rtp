@@ -112,7 +112,6 @@ public class RtpSocket {
 			upts = false;
 			buffer[1] -= 0x80;
 		}
-
 	}
 
 	/** Increments the sequence number. */

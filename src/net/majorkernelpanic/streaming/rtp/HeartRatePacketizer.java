@@ -51,7 +51,6 @@ public class HeartRatePacketizer extends AbstractPacketizer implements Runnable{
 	private int naluLength = 0;
 	private long delay = 0;
 	private Statistics stats = new Statistics();
-	BufferedReader b;
 
 	public HeartRatePacketizer() throws IOException {
 		super();
@@ -100,7 +99,7 @@ public class HeartRatePacketizer extends AbstractPacketizer implements Runnable{
 					}
 					else
 					{
-						buffer [countchars] = (byte)c;
+						buffer [rtphl + countchars] = (byte)c;
 						countchars++;
 					}
 				}
@@ -129,7 +128,7 @@ public class HeartRatePacketizer extends AbstractPacketizer implements Runnable{
 				
 				//Log.d(TAG,"frameLength: "+frameLength+" protection: "+protection+ " length: "+length);
 				
-				send(countchars);
+				super.send(countchars + rtphl);
 
 				// We wait a little to avoid sending to many packets too quickly
 				now = System.nanoTime();
@@ -143,7 +142,8 @@ public class HeartRatePacketizer extends AbstractPacketizer implements Runnable{
 				measured -= lastmeasured<2*expected/3 ? 2*expected/3-lastmeasured : 0;
 				lastmeasured = measured;
 				if (measured<2*expected/3) {
-					Thread.sleep( 2*expected/3-measured );
+					//Thread.sleep( 2*expected/3-measured );
+					Thread.sleep( 2000 );
 				}
 			}
 		}
@@ -159,60 +159,10 @@ public class HeartRatePacketizer extends AbstractPacketizer implements Runnable{
 
 	}
 
+
 	/*
-	// Reads a NAL unit in the FIFO and sends it
-	// If it is too big, we split it in FU-A units (RFC 3984)
-	private void send() throws IOException, InterruptedException {
-		int sum = 1, len = 0, type;
+	private int fill(int offset,int length) throws IOException {
 
-		// Read out a line of the file
-		// A buffer
-		//byte[] buffer = new byte[20];
-
-	 	//len = fill();
-		//System.out.println("Packetize the input stream from the file");
-
-		//Toast.makeText(getApplicationContext(), "File contains: " + new String(buffer), Toast.LENGTH_LONG).show();
-			//Toast.makeText(getApplicationContext(), "File contains: " + line, Toast.LENGTH_LONG).show();
-		// Read the input stream into a buffer
-		//is.read(buffer, 0, 20);
-		
-		
-		//type = buffer[rtphl]&0x1F;
-
-		ts += delay*9/100000;
-		socket.updateTimestamp(ts);
-
-		//Log.d(TAG,"- Nal unit length: " + naluLength + " delay: "+delay+" type: "+type);
-
-		socket.markNextPacket();
-		super.send(len);
-		//Log.d(TAG,"----- Single NAL unit - len:"+len+" header:"+printBuffer(rtphl,rtphl+3)+" delay: "+delay+" newDelay: "+newDelay);
-		
-	}*/
-	
-	/*
-		private int fill() throws IOException {
-			int sum = 0, len;
-			
-			String line = new String();
-			while((line = b.readLine()) != null)
-			{
-				len = is.read(buffer, 0, line.length());
-
-				if (len<0) {
-					throw new IOException("End of stream");
-				}
-				else
-				sum+=len;
-			}
-
-			return sum;
-
-		}
-*/
-/*		
-		private int fill(int offset,int length) throws IOException {
 		int sum = 0, len;
 
 		while (sum<length) {
@@ -224,7 +174,6 @@ public class HeartRatePacketizer extends AbstractPacketizer implements Runnable{
 		}
 
 		return sum;
-
 	}*/
 
 
